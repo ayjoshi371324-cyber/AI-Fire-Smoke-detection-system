@@ -8,6 +8,7 @@ and seamlessly switches between development/fallback models and custom-trained m
 from typing import List, Dict, Any, Tuple, Optional, Union
 import logging
 from pathlib import Path
+import os
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -41,7 +42,8 @@ class YOLODetector:
         self,
         model_path: Optional[str] = None,
         conf_threshold: Optional[float] = None,
-        device: Optional[str] = None
+        device: Optional[str] = None,
+        imgsz: Optional[int] = None
     ):
         """
         Initialize detector with specified model or default from configuration.
@@ -50,15 +52,28 @@ class YOLODetector:
             model_path: Optional path to YOLO weights (.pt). If None, uses config.MODEL_PATH.
             conf_threshold: Minimum detection confidence (0.0 - 1.0).
             device: Computation device ('cpu', 'cuda', '0', etc.). Auto-detected if None.
+            imgsz: Optional inference image dimension (e.g. 320 or 640) for speed optimization.
         """
         self.conf_threshold = conf_threshold if conf_threshold is not None else config.CONF_THRESHOLD
         self.device = device  # None lets Ultralytics select best available device
+        self.imgsz = imgsz
 
         # Determine model path with graceful fallback
         target_path = Path(model_path) if model_path else Path(config.MODEL_PATH)
         fallback_path = Path(config.FALLBACK_MODEL_PATH)
 
         if target_path.exists():
+            if target_path.is_dir() and (target_path / "data.pkl").exists():
+                import zipfile
+                packaged_path = target_path.parent / (target_path.stem + "_packed.pt")
+                if not packaged_path.exists() or packaged_path.stat().st_mtime < target_path.stat().st_mtime:
+                    with zipfile.ZipFile(packaged_path, "w", compression=zipfile.ZIP_STORED) as zf:
+                        for root, _, files in os.walk(target_path):
+                            for file in files:
+                                full_file = Path(root) / file
+                                rel = full_file.relative_to(target_path).as_posix()
+                                zf.write(full_file, f"archive/{rel}")
+                target_path = packaged_path
             self.model_path = str(target_path)
             self.is_custom_model = True
             logger.info(f"Loading primary YOLO model from '{self.model_path}'")
@@ -83,7 +98,8 @@ class YOLODetector:
     def detect(
         self,
         frame: np.ndarray,
-        conf: Optional[float] = None
+        conf: Optional[float] = None,
+        imgsz: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """
         Run inference on a single frame and return standardized detections.
@@ -91,6 +107,7 @@ class YOLODetector:
         Args:
             frame: Input image/frame as numpy array (BGR).
             conf: Optional confidence override for this inference call.
+            imgsz: Optional resolution override for inference.
 
         Returns:
             List[Dict[str, Any]]: Standardized list of detections:
@@ -107,14 +124,19 @@ class YOLODetector:
             return []
 
         threshold = conf if conf is not None else self.conf_threshold
+        active_imgsz = imgsz or self.imgsz
 
         # Run Ultralytics YOLO inference
-        results = self.model.predict(
-            source=frame,
-            conf=threshold,
-            verbose=False,
-            device=self.device
-        )
+        predict_kwargs = {
+            "source": frame,
+            "conf": threshold,
+            "verbose": False,
+            "device": self.device
+        }
+        if active_imgsz:
+            predict_kwargs["imgsz"] = active_imgsz
+
+        results = self.model.predict(**predict_kwargs)
 
         detections: List[Dict[str, Any]] = []
 

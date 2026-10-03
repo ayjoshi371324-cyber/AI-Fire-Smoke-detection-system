@@ -22,12 +22,16 @@ events.db-journal
 snapshots/*
 !snapshots/.gitkeep
 
-# Local Video Tests (preserve directory)
-videos/*
+# Local Video Tests (preserve sample videos)
 !videos/.gitkeep
+!videos/fire_test.mp4
+!videos/smoke_test.mp4
 
-# Models (weights are external artifacts)
-models/*.pt
+# Models
+models/best_extracted/
+models/yolov8n.pt
+models/*_packed.pt
+!models/best.pt
 !models/.gitkeep
 
 # IDE & OS
