@@ -55,6 +55,17 @@ CAMERAS = {
     "Smoke Video": "videos/smoke_test.mp4"
 }
 
+# Physical Location Metadata for Cameras
+CAMERA_LOCATIONS = {
+    "Webcam 0": "Building A - Reception",
+    "Fire Video": "Server Room Rack B",
+    "Smoke Video": "Chemical Storage Warehouse"
+}
+
+def get_camera_location(camera_name: str) -> str:
+    """Return configured location for a camera, falling back to camera name."""
+    return CAMERA_LOCATIONS.get(camera_name, camera_name)
+
 # Ensure runtime directories exist
 def ensure_directories():
     """Ensure runtime folders exist upon initialization."""
