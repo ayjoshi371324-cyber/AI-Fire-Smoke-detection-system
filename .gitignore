@@ -1,0 +1,38 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment Variables & Secrets
+.env
+.env.local
+
+# Database & Runtime Data
+events.db
+events.db-journal
+
+# Snapshots & Generated Media (preserve directory)
+snapshots/*
+!snapshots/.gitkeep
+
+# Local Video Tests (preserve directory)
+videos/*
+!videos/.gitkeep
+
+# Models (weights are external artifacts)
+models/*.pt
+!models/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
