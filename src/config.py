@@ -27,6 +27,11 @@ CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.50"))
 CONFIRM_FRAMES = int(os.getenv("CONFIRM_FRAMES", "5"))
 WINDOW_SIZE = int(os.getenv("WINDOW_SIZE", "10"))
 
+# Severity Estimation Thresholds (fraction of frame area)
+SEVERITY_LOW_THRESHOLD = float(os.getenv("SEVERITY_LOW_THRESHOLD", "0.01"))      # 1% of frame
+SEVERITY_MEDIUM_THRESHOLD = float(os.getenv("SEVERITY_MEDIUM_THRESHOLD", "0.05"))  # 5% of frame
+SEVERITY_HIGH_THRESHOLD = float(os.getenv("SEVERITY_HIGH_THRESHOLD", "0.15"))     # 15% of frame
+
 # Alert Settings
 ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC", "30"))
 LOCAL_ALARM_ENABLED = os.getenv("LOCAL_ALARM_ENABLED", "True").lower() in ("true", "1", "yes")
