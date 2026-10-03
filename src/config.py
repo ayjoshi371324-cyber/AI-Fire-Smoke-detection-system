@@ -20,7 +20,7 @@ else:
 
 # Model Settings
 MODEL_PATH = os.getenv("MODEL_PATH", "models/best.pt")
-FALLBACK_MODEL_PATH = os.getenv("FALLBACK_MODEL_PATH", "yolov8n.pt")
+FALLBACK_MODEL_PATH = os.getenv("FALLBACK_MODEL_PATH", "models/yolov8n.pt")
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.50"))
 
 # Temporal Filter Settings (False Alarm Reduction)
